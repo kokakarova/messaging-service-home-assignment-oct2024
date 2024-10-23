@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: messaging-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/msgservice
+    username: admin
+    password: opensesame
+  jpa:
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  sql:
+    init:
+      platform: postgresql
+      mode: always
+  main:
+    allow-circular-references: true
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
