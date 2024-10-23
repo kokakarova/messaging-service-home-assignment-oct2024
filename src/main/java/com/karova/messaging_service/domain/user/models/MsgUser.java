@@ -7,11 +7,10 @@ import java.util.UUID;
 
 @Entity
 @Data
-@Table(name = "user")
 public class MsgUser {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private UUID userId;
     private String email;
     private String userName;
 }

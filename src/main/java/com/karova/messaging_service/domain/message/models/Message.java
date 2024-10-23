@@ -4,6 +4,7 @@ import com.karova.messaging_service.domain.user.models.MsgUser;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -11,11 +12,7 @@ import java.util.UUID;
 public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private UUID msgId;
     private String content;
-    // assuming that one message can be sent to one user
-    @ManyToOne
-    private MsgUser receiver;
-    @ManyToOne
-    private MsgUser sender;
+    private LocalDateTime receivedAt;
 }
