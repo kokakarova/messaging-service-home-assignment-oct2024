@@ -29,4 +29,11 @@ public class MsgRelationService {
         MsgRelation msgRelationReceiver = new MsgRelation(new MsgRelationKey(newMessage.getMessageId(), RECEIVER), receiver);
         msgRelationRepository.saveAll(List.of(msgRelationSender, msgRelationReceiver));
     }
+
+    public List<MsgRelation> getMessageRelationForReceiverId(UUID receiverId) {
+//        List<MsgRelation> messagesReceiver = msgRelationRepository.findAllByUserIdAndRAndMsgRelationKey_UserRole(receiverId, RECEIVER);
+//        List<MsgRelation> messagesReceiver = msgRelationRepository.findAll();
+        // todo: (custom) exception - entity not found
+        return msgRelationRepository.findAll();
+    }
 }

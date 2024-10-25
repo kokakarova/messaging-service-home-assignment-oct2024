@@ -10,4 +10,5 @@ import java.util.UUID;
 @Repository
 public interface MessageRepository extends ListCrudRepository<Message, UUID> {
     List<Message> findAllByFetchedFalse();
+    List<Message> findAllByMessageIdIn(List<UUID> messageIds);
 }

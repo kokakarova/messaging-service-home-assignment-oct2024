@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -38,16 +39,20 @@ public class MessageController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping(value = {"/newMessages", "/newMessages/{id}"})
-    public ResponseEntity<List<Message>> getNewMessages(@PathVariable(value = "id", required = false) String userId) {
-        if (userId == null) {
+    @GetMapping(value = {"/newMessages", "/newMessages/{userId}"})
+    public ResponseEntity<List<Message>> getNewMessages(@PathVariable Optional<String> userId) {
+        if (userId.isEmpty()) {
             // fetch all new messages
             List<Message> allNewMessages = messageService.getAllNewMessages();
+            // todo: convert to dto (leave out fetched: true/false)
             return ResponseEntity.ok(allNewMessages);
-        } else if (MsgValidator.isValid(userId)) {
-            // fetch new messages only for userId
-            return ResponseEntity.notFound().build();
+        } else if (!MsgValidator.isValid(userId.get())) {
+            return ResponseEntity.badRequest().build();
+        } else {
+            // fetch new messages for user_id
+            List<Message> allNewMessagesForUser = messageService.getAllNewMessagesByReceiverId(UUID.fromString(userId.get()));
+            // todo: convert to dto (leave out fetched: true/false)
+            return ResponseEntity.accepted().build();
         }
-        return ResponseEntity.ok(List.of(new Message()));
     }
 }
