@@ -1,18 +1,21 @@
 package com.karova.messaging_service.domain.message.models;
 
-import com.karova.messaging_service.domain.user.models.MsgUser;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Data
 @Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID msgId;
     private String content;
-    private LocalDateTime receivedAt;
+    private LocalDateTime sentAt;
 }
