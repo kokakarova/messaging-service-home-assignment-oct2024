@@ -18,4 +18,5 @@ public class Message {
     private UUID messageId;
     private String content;
     private LocalDateTime sentAt;
+    private boolean fetched;
 }
