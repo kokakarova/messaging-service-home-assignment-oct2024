@@ -15,7 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MsgRelationKey implements Serializable {
-    @Column(name = "msg_id")
+    @Column(name = "message_id")
     private UUID messageId;
     @Column(name = "user_role")
     private RelationRole userRole;

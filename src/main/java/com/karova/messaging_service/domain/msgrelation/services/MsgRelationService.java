@@ -25,8 +25,8 @@ public class MsgRelationService {
     public void createNewMessageRelations(SaveMessageReqDto message, Message newMessage) {
         MsgUser sender = msgUserService.getUserById(UUID.fromString(message.senderId()));
         MsgUser receiver = msgUserService.getUserById(UUID.fromString(message.receiverId()));
-        MsgRelation msgRelationSender = new MsgRelation(new MsgRelationKey(newMessage.getMsgId(), SENDER), sender);
-        MsgRelation msgRelationReceiver = new MsgRelation(new MsgRelationKey(newMessage.getMsgId(), RECEIVER), receiver);
+        MsgRelation msgRelationSender = new MsgRelation(new MsgRelationKey(newMessage.getMessageId(), SENDER), sender);
+        MsgRelation msgRelationReceiver = new MsgRelation(new MsgRelationKey(newMessage.getMessageId(), RECEIVER), receiver);
         msgRelationRepository.saveAll(List.of(msgRelationSender, msgRelationReceiver));
     }
 }

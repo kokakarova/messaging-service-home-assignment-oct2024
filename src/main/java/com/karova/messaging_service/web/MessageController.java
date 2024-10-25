@@ -23,10 +23,10 @@ public class MessageController {
     }
 
     @PostMapping("/newMessage")
-    public ResponseEntity<SaveMessageResDto> saveNewMessage(@RequestBody SaveMessageReqDto messageReq) {
+    public ResponseEntity<SaveMessageResDto> saveNewMessage(@Valid @RequestBody SaveMessageReqDto messageReq) {
         Message savedMessage = messageService.createMessage(messageReq);
         SaveMessageResDto response = SaveMessageResDto.toDto(
-                savedMessage.getMsgId(),
+                savedMessage.getMessageId(),
                 messageReq.content(),
                 messageReq.senderId(),
                 messageReq.receiverId(),
