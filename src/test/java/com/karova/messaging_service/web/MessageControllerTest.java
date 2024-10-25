@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -95,5 +96,16 @@ class MessageControllerTest {
                         .characterEncoding("utf-8"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message_id", Matchers.is(MOCK_MESSAGE_ID.toString())));
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldReturn_BadRequest_WhenUserIdPresentButInvalid() {
+        String invalidUserId = "invalid-user-id";
+        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/newMessages/" + invalidUserId )
+                .toUriString();
+        System.out.println("url = " + url);
+        mockMvc.perform(get(url))
+                .andExpect(status().isBadRequest());
     }
 }
