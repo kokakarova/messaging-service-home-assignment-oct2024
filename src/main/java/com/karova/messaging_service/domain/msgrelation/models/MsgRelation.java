@@ -14,7 +14,7 @@ public class MsgRelation {
     // this entity is to keep track of sender and receiver
     @EmbeddedId
     private MsgRelationKey msgRelationKey;
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private MsgUser user;
 
 }
