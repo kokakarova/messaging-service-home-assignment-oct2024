@@ -1,22 +1,20 @@
 package com.karova.messaging_service.domain.msgrelation.models;
 
-import com.karova.messaging_service.domain.message.models.Message;
-import com.karova.messaging_service.domain.msgrelation.RelationRole;
 import com.karova.messaging_service.domain.user.models.MsgUser;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-
-import java.util.UUID;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class MsgRelation {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID relationshipId;
-    private RelationRole userRole;
+    // this entity is to keep track of sender and receiver
+    @EmbeddedId
+    private MsgRelationKey msgRelationKey;
     @OneToOne
     private MsgUser user;
-    @OneToOne
-    private Message message;
+
 }
