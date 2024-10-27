@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record SaveMessageResDto(
-        String msgId,
-        String msgContent,
+        String messageId,
+        String messageContent,
         String senderId,
         String receiverId,
         LocalDateTime sentAt) {
