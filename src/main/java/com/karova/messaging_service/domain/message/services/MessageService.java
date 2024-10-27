@@ -51,4 +51,8 @@ public class MessageService {
         });
         return allMessages;
     }
+
+    public void deleteMessages(List<UUID> messageIds) {
+        messageRepository.deleteAllById(messageIds);
+    }
 }
