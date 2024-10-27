@@ -88,7 +88,7 @@ class MessageServiceTest {
         when(messageRepository.findAllByReceiverIdOrderByDateSentDesc(MOCK_USER_ID))
                 .thenReturn(Optional.of(messages));
         int expectedSize = 2;
-        List<Message> actualResult = messageService.getAllMessagesByReceiverId(MOCK_USER_ID);
+        List<Message> actualResult = messageService.getMessagesByReceiverId(MOCK_USER_ID);
         assertEquals(expectedSize, actualResult.size());
         assertInstanceOf(Message.class, actualResult.getFirst());
         assertTrue(actualResult.getFirst().isRead());
@@ -100,7 +100,7 @@ class MessageServiceTest {
         List<Message> messages = List.of(MOCK_MESSAGE_3, MOCK_MESSAGE_2, MOCK_MESSAGE_1);
         when(messageRepository.findAllByReceiverIdOrderByDateSentDesc(MOCK_USER_ID))
                 .thenReturn(Optional.of(messages));
-        List<Message> actualResult = messageService.getAllMessagesByReceiverId(MOCK_USER_ID);
+        List<Message> actualResult = messageService.getMessagesByReceiverId(MOCK_USER_ID);
         assertTrue(actualResult.getFirst().getDateSent().isAfter(actualResult.get(1).getDateSent()));
         assertTrue(actualResult.getFirst().getDateSent().isAfter(actualResult.get(2).getDateSent()));
         assertTrue(actualResult.get(1).getDateSent().isAfter(actualResult.get(2).getDateSent()));
@@ -112,7 +112,7 @@ class MessageServiceTest {
         when(messageRepository.findAllByReceiverIdOrderByDateSentDesc(MOCK_USER_ID))
                 .thenReturn(Optional.of(messages));
         int expectedSize = 3;
-        List<Message> actualResult = messageService.getAllMessagesByReceiverId(MOCK_USER_ID);
+        List<Message> actualResult = messageService.getMessagesByReceiverId(MOCK_USER_ID);
         assertEquals(expectedSize, actualResult.size());
         assertInstanceOf(Message.class, actualResult.getFirst());
         assertTrue(actualResult.getFirst().isRead());

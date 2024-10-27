@@ -39,23 +39,24 @@ public class MessageController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/new/{userId}")
-    public ResponseEntity<List<GetMessageResDto>> getNewMessages(@PathVariable String userId) {
-        if (MsgValidator.isValid(userId)) {
-            List<Message> allNewMessagesForUser = messageService.getAllNewMessagesByReceiverId(UUID.fromString(userId));
-            List<GetMessageResDto> response = allNewMessagesForUser.stream().map(GetMessageResDto::toDto).toList();
-            return ResponseEntity.ok(response);
-        } else {
-            return ResponseEntity.badRequest().build();
-        }
-    }
+//    @GetMapping("/new/{userId}")
+//    public ResponseEntity<List<GetMessageResDto>> getNewMessages(@PathVariable String userId) {
+//        if (MsgValidator.isValid(userId)) {
+//            List<Message> allNewMessagesForUser = messageService.getAllNewMessagesByReceiverId(UUID.fromString(userId));
+//            List<GetMessageResDto> response = allNewMessagesForUser.stream().map(GetMessageResDto::toDto).toList();
+//            return ResponseEntity.ok(response);
+//        } else {
+//            return ResponseEntity.badRequest().build();
+//        }
+//    }
 
-    // todo: pagination (?)
+    // todo: pagination (?) + merge the two GetMapping with additional pathVariable: boolean newOnly
     @GetMapping("/{userId}")
-    public ResponseEntity<List<GetMessageResDto>> getAllMessage(@PathVariable UUID userId) {
+    public ResponseEntity<List<GetMessageResDto>> getMessage(@PathVariable UUID userId,
+                                                             @RequestParam(defaultValue = "true") boolean newOnly) {
         if (MsgValidator.isValid(userId.toString())) {
-            List<Message> allMessagesForUser = messageService.getAllMessagesByReceiverId(userId);
-            List<GetMessageResDto> response = allMessagesForUser.stream().map(GetMessageResDto::toDto).toList();
+            List<Message> messagesByReceiverId = messageService.getMessagesByReceiverId(userId, newOnly);
+            List<GetMessageResDto> response = messagesByReceiverId.stream().map(GetMessageResDto::toDto).toList();
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.badRequest().build();
@@ -66,7 +67,11 @@ public class MessageController {
     // todo: write tests
     @DeleteMapping("/remove")
     public ResponseEntity<String> removeMessages(@RequestParam List<UUID> messageId) {
+        String responseMessage = "Messages removed successfully";
+        if (messageId.size() == 1) {
+            responseMessage = "Message removed successfully";
+        }
         messageService.deleteMessages(messageId);
-        return ResponseEntity.ok("Message removed successfully");
+        return ResponseEntity.ok(responseMessage);
     }
 }

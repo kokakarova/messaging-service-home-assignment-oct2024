@@ -10,6 +10,6 @@ import java.util.UUID;
 
 @Repository
 public interface MessageRepository extends ListCrudRepository<Message, UUID> {
-    Optional<List<Message>> findAllByReadFalseAndReceiverId(UUID receiverId);
+    Optional<List<Message>> findAllByReadFalseAndReceiverIdOrderByDateSentDesc(UUID receiverId);
     Optional<List<Message>> findAllByReceiverIdOrderByDateSentDesc(UUID receiverId);
 }
