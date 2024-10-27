@@ -4,14 +4,14 @@ import com.karova.messaging_service.domain.message.models.Message;
 
 import java.time.LocalDateTime;
 
-public record GetMessageResDto(
+public record MessageResDto(
         String messageId,
         String senderName,
         String content,
         LocalDateTime sentAt
 ) {
-    public static GetMessageResDto toDto(Message message) {
-        return new GetMessageResDto(
+    public static MessageResDto toDto(Message message) {
+        return new MessageResDto(
                 message.getId().toString(),
                 message.getSender().getUserName(),
                 message.getContent(),
