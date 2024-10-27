@@ -5,10 +5,11 @@ import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface MessageRepository extends ListCrudRepository<Message, UUID> {
-    List<Message> findAllByFetchedFalse();
-    List<Message> findAllByMessageIdIn(List<UUID> messageIds);
+    Optional<List<Message>> findAllByReadFalseAndReceiverId(UUID receiverId);
+    Optional<List<Message>> findAllByReceiverIdOrderByDateSentDesc(UUID receiverId);
 }
