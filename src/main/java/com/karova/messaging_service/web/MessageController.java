@@ -2,11 +2,13 @@ package com.karova.messaging_service.web;
 
 import com.karova.messaging_service.domain.message.models.Message;
 import com.karova.messaging_service.domain.message.services.MessageService;
-import com.karova.messaging_service.web.dtos.GetMessageResDto;
+import com.karova.messaging_service.web.dtos.MessageListResDto;
+import com.karova.messaging_service.web.dtos.MessageResDto;
 import com.karova.messaging_service.web.dtos.SaveMessageReqDto;
 import com.karova.messaging_service.web.dtos.SaveMessageResDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,24 +41,18 @@ public class MessageController {
         return ResponseEntity.ok(response);
     }
 
-//    @GetMapping("/new/{userId}")
-//    public ResponseEntity<List<GetMessageResDto>> getNewMessages(@PathVariable String userId) {
-//        if (MsgValidator.isValid(userId)) {
-//            List<Message> allNewMessagesForUser = messageService.getAllNewMessagesByReceiverId(UUID.fromString(userId));
-//            List<GetMessageResDto> response = allNewMessagesForUser.stream().map(GetMessageResDto::toDto).toList();
-//            return ResponseEntity.ok(response);
-//        } else {
-//            return ResponseEntity.badRequest().build();
-//        }
-//    }
-
-    // todo: pagination (?) + merge the two GetMapping with additional pathVariable: boolean newOnly
     @GetMapping("/{userId}")
-    public ResponseEntity<List<GetMessageResDto>> getMessage(@PathVariable UUID userId,
-                                                             @RequestParam(defaultValue = "true") boolean newOnly) {
+    public ResponseEntity<MessageListResDto> getMessage(@PathVariable UUID userId,
+                                                        @RequestParam(name = "page", defaultValue = "0") int page,
+                                                        @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+                                                        @RequestParam(defaultValue = "true") boolean newOnly) {
         if (MsgValidator.isValid(userId.toString())) {
-            List<Message> messagesByReceiverId = messageService.getMessagesByReceiverId(userId, newOnly);
-            List<GetMessageResDto> response = messagesByReceiverId.stream().map(GetMessageResDto::toDto).toList();
+            Page<Message> messages = messageService.getMessagesByReceiverId(userId, newOnly, page, pageSize);
+            MessageListResDto response = new MessageListResDto(
+                    messages.getNumber(),
+                    messages.getTotalPages(),
+                    messages.getNumberOfElements(),
+                    messages.stream().map(MessageResDto::toDto).toList());
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.badRequest().build();
@@ -64,7 +60,6 @@ public class MessageController {
     }
 
     // todo: elaborate why it's one endpoint for single and multiple messages
-    // todo: write tests
     @DeleteMapping("/remove")
     public ResponseEntity<String> removeMessages(@RequestParam List<UUID> messageId) {
         String responseMessage = "Messages removed successfully";
