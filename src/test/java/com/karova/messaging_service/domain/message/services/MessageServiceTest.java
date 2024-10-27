@@ -31,7 +31,7 @@ class MessageServiceTest {
     private static final UUID MOCK_MESSAGE_ID_1 = UUID.randomUUID();
     private static final UUID MOCK_MESSAGE_ID_2 = UUID.randomUUID();
     private static final LocalDateTime MOCK_TIMESTAMP_EARLIEST =
-            LocalDateTime.of(2024, 02, 10, 14, 22);
+            LocalDateTime.of(2024, 2, 10, 14, 22);
     private static final LocalDateTime MOCK_TIMESTAMP_MIDDLE =
             LocalDateTime.of(2024, 10, 25, 15, 32);
     private static final LocalDateTime MOCK_TIMESTAMP_LATEST =
