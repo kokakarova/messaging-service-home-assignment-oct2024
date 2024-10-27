@@ -4,32 +4,30 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.karova.messaging_service.domain.message.models.Message;
 import com.karova.messaging_service.domain.message.services.MessageService;
 import com.karova.messaging_service.domain.user.models.MsgUser;
-import com.karova.messaging_service.web.dtos.GetMessageResDto;
+import com.karova.messaging_service.web.dtos.MessageResDto;
 import com.karova.messaging_service.web.dtos.SaveMessageReqDto;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.SneakyThrows;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import static com.karova.messaging_service.web.MsgValidator.isValid;
-import static com.karova.messaging_service.web.dtos.GetMessageResDto.toDto;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static com.karova.messaging_service.web.dtos.MessageResDto.toDto;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -118,10 +116,10 @@ class MessageControllerTest {
 
     @Test
     @SneakyThrows
-    void shouldReturn_BadRequest_WhenUserIdPresentButInvalid() {
+    void shouldReturn_BadRequest_WhenGettingMessages_ForInvalidUserId() {
         // todo: put in beforeEach, close AfterEach
         MockedStatic<MsgValidator> mocked = mockStatic(MsgValidator.class);
-        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/messages/new/" + INVALID_USER_ID)
+        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/messages/" + INVALID_USER_ID)
                 .toUriString();
         mocked.when(() -> isValid(anyString()))
                 .thenReturn(false);
@@ -132,21 +130,43 @@ class MessageControllerTest {
 
     @Test
     @SneakyThrows
-    void shouldReturn_200OK_AND_MessagesList_Size1() {
-        MockedStatic<GetMessageResDto> mocked = mockStatic(GetMessageResDto.class);
-        when(messageService.getAllNewMessagesByReceiverId(UUID.fromString(MOCK_RECEIVER_ID)))
-                .thenReturn(List.of(MOCK_MESSAGE));
+    void shouldReturn_200OK_And_0ForPage_10ForPageSize_1ForTotalElements() {
+        MockedStatic<MessageResDto> mocked = mockStatic(MessageResDto.class);
+        when(messageService.getMessagesByReceiverId(any(UUID.class), any(Boolean.class), anyInt(), anyInt()))
+                .thenReturn(new PageImpl<>(List.of(MOCK_MESSAGE)));
         mocked.when(() -> toDto(MOCK_MESSAGE))
-                .thenReturn(new GetMessageResDto(
+                .thenReturn(new MessageResDto(
                         MOCK_MESSAGE_ID.toString(),
                         MOCK_MESSAGE.getSender().getUserName(),
                         MOCK_MESSAGE_CONTENT,
                         MOCK_MESSAGE.getDateSent()));
-        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/messages/new/" + MOCK_RECEIVER_ID)
+        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/messages/" + MOCK_RECEIVER_ID + "?newOnly=true")
                 .toUriString();
         mockMvc.perform(get(url))
                 .andExpect(status().isOk())
-                .andExpectAll(jsonPath("$.size()", Matchers.is(1)));
+                .andExpect(jsonPath("$.page", Matchers.is(0)))
+                .andExpect(jsonPath("$.totalPages", Matchers.is(1)))
+                .andExpect(jsonPath("$.totalElements", Matchers.is(1)));
+        mocked.close();
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldReturn_200OK_And_MessagesList_Size1_WhenNewOnly_IsTrue() {
+        MockedStatic<MessageResDto> mocked = mockStatic(MessageResDto.class);
+        when(messageService.getMessagesByReceiverId(any(UUID.class), any(Boolean.class), anyInt(), anyInt()))
+                .thenReturn(new PageImpl<>(List.of(MOCK_MESSAGE)));
+        mocked.when(() -> toDto(MOCK_MESSAGE))
+                .thenReturn(new MessageResDto(
+                        MOCK_MESSAGE_ID.toString(),
+                        MOCK_MESSAGE.getSender().getUserName(),
+                        MOCK_MESSAGE_CONTENT,
+                        MOCK_MESSAGE.getDateSent()));
+        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/messages/" + MOCK_RECEIVER_ID + "?newOnly=true")
+                .toUriString();
+        mockMvc.perform(get(url))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.messages.size()", Matchers.is(1)));
         mocked.close();
     }
 
@@ -154,13 +174,37 @@ class MessageControllerTest {
     @Test
     @SneakyThrows
     void shouldReturn_EmptyList_WhenNoNewMessages() {
-        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/messages/new/"+ MOCK_RECEIVER_ID)
+        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/messages/" + MOCK_RECEIVER_ID + "?newOnly=true")
                 .toUriString();
-        // todo: would this return null or empty list?
-        when(messageService.getAllNewMessagesByReceiverId(UUID.fromString(MOCK_RECEIVER_ID)))
-                .thenReturn(new ArrayList<>());
+        when(messageService.getMessagesByReceiverId(any(UUID.class), any(Boolean.class), anyInt(), anyInt()))
+                .thenReturn(new PageImpl<>(List.of()));
         mockMvc.perform(get(url))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", Matchers.empty()));
+                .andExpect(jsonPath("$.messages", Matchers.empty()));
     }
+
+    @Test
+    @SneakyThrows
+    void shouldReturn_200OK_AndMessageRemovedSuccessfully_WhenRemoving1Message() {
+        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/messages/remove?messageId=" + MOCK_MESSAGE_ID)
+                .toUriString();
+        Mockito.doNothing().when(messageService).deleteMessages(List.of(MOCK_MESSAGE_ID));
+        mockMvc.perform(delete(url))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", Matchers.is("Message removed successfully")));
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldReturn_200OK_AndMessagesRemovedSuccessfully_WhenRemoving2Message() {
+        UUID mockMessageId2 = UUID.randomUUID();
+        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/messages/remove?messageId=" + MOCK_MESSAGE_ID
+                + "&messageId=" + mockMessageId2)
+                .toUriString();
+        Mockito.doNothing().when(messageService).deleteMessages(List.of(MOCK_MESSAGE_ID));
+        mockMvc.perform(delete(url))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", Matchers.is("Messages removed successfully")));
+    }
+
 }

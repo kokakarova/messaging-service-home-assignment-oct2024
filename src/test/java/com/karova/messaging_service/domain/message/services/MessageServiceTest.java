@@ -3,18 +3,24 @@ package com.karova.messaging_service.domain.message.services;
 import com.karova.messaging_service.domain.message.models.Message;
 import com.karova.messaging_service.domain.message.repos.MessageRepository;
 import com.karova.messaging_service.domain.user.models.MsgUser;
+import com.karova.messaging_service.domain.user.services.MsgUserService;
+import com.karova.messaging_service.web.dtos.SaveMessageReqDto;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -24,7 +30,8 @@ class MessageServiceTest {
     private MessageService messageService;
     @MockBean
     private MessageRepository messageRepository;
-
+    @MockBean
+    private MsgUserService userService;
 
     private static final UUID MOCK_USER_ID = UUID.randomUUID();
     private static final String MOCK_MESSAGE_CONTENT = "mock message content";
@@ -36,6 +43,8 @@ class MessageServiceTest {
             LocalDateTime.of(2024, 10, 25, 15, 32);
     private static final LocalDateTime MOCK_TIMESTAMP_LATEST =
             LocalDateTime.of(2024, 10, 27, 18, 57);
+    private static final String MOCK_SENDER_ID = "2f3197d6-f0d9-480a-9781-1588012e3e73";
+    private static final String MOCK_RECEIVER_ID = "7f3191d6-f0d9-480a-9781-1588012e3e55";
     private static final Message MOCK_MESSAGE_1 = new Message(
             MOCK_MESSAGE_ID_1,
             new MsgUser(),
@@ -60,61 +69,66 @@ class MessageServiceTest {
             MOCK_TIMESTAMP_LATEST,
             true
     );
+    private static final SaveMessageReqDto MOCK_MESSAGE_REQUEST =
+            new SaveMessageReqDto(MOCK_SENDER_ID, MOCK_RECEIVER_ID, MOCK_MESSAGE_CONTENT);
+    Pageable pageRequest = PageRequest.of(0, 10);
 
     @Test
-    void shouldReturn_ListSize1_ListOfTypeMessage_And_UpdateReadToTrue_And() {
-        List<Message> messages = List.of(MOCK_MESSAGE_1);
-        when(messageRepository.findAllByReadFalseAndReceiverId(MOCK_USER_ID))
-                .thenReturn(Optional.of(messages));
+    void shouldReturn_TypeMessage_AndCorrectMessageContent() {
+        when(messageRepository.save(any(Message.class))).thenReturn(MOCK_MESSAGE_1);
+        when(userService.getUserById(any(String.class))).thenReturn(new MsgUser());
+        Message actualResult = messageService.createMessage(MOCK_MESSAGE_REQUEST);
+        assertInstanceOf(Message.class, actualResult);
+        assertEquals(MOCK_MESSAGE_CONTENT, actualResult.getContent());
+    }
+
+    @Test
+    void shouldReturn_NotFound_WhenUserDoesntExist() {
+        when(messageRepository.save(any(Message.class))).thenReturn(MOCK_MESSAGE_1);
+        when(userService.getUserById(any(String.class))).thenThrow();
+        assertThrows(EntityNotFoundException.class, () -> messageService.createMessage(MOCK_MESSAGE_REQUEST));
+    }
+
+    @Test
+    void shouldReturn_ListSize1_PageOfTypeMessage_And_UpdateReadToTrue() {
+        when(messageRepository.findAllByReadFalseAndReceiverIdOrderByDateSentDesc(MOCK_USER_ID, pageRequest))
+                .thenReturn(new PageImpl<>(List.of(MOCK_MESSAGE_1)));
         int expectedSize = 1;
-        List<Message> actualResult = messageService.getAllNewMessagesByReceiverId(MOCK_USER_ID);
-        assertEquals(expectedSize, actualResult.size());
-        assertInstanceOf(Message.class, actualResult.getFirst());
-        assertTrue(actualResult.getFirst().isRead());
+        Page<Message> actualResult = messageService.getMessagesByReceiverId(
+                MOCK_USER_ID,
+                true,
+                0,
+                10);
+        assertEquals(expectedSize, actualResult.getSize());
+        assertInstanceOf(Message.class, actualResult.get().toList().getFirst());
+        assertTrue(actualResult.get().toList().getFirst().isRead());
     }
 
     @Test
     void shouldReturn_EmptyList_WhenNewMessagesNotFound() {
-        when(messageRepository.findAllByReadFalseAndReceiverId(MOCK_USER_ID))
-                .thenReturn(Optional.of(new ArrayList<>()));
+        when(messageRepository.findAllByReadFalseAndReceiverIdOrderByDateSentDesc(MOCK_USER_ID, pageRequest))
+                .thenReturn(new PageImpl<>(List.of()));
         int expectedSize = 0;
-        List<Message> actualResult = messageService.getAllNewMessagesByReceiverId(MOCK_USER_ID);
-        assertEquals(expectedSize, actualResult.size());
-    }
-
-    @Test
-    void shouldReturn_ListSize2_ListOfTypeMessage_And_UpdateReadToTrue_And() {
-        List<Message> messages = List.of(MOCK_MESSAGE_1, MOCK_MESSAGE_2);
-        when(messageRepository.findAllByReceiverIdOrderByDateSentDesc(MOCK_USER_ID))
-                .thenReturn(Optional.of(messages));
-        int expectedSize = 2;
-        List<Message> actualResult = messageService.getMessagesByReceiverId(MOCK_USER_ID);
-        assertEquals(expectedSize, actualResult.size());
-        assertInstanceOf(Message.class, actualResult.getFirst());
-        assertTrue(actualResult.getFirst().isRead());
+        Page<Message> actualResult = messageService.getMessagesByReceiverId(
+                MOCK_USER_ID,
+                true,
+                0,
+                10);
+        assertEquals(expectedSize, actualResult.get().toList().size());
     }
 
     @Test
     void shouldReturn_OrderedMessages_LatestFirst_EarliestLast() {
-
-        List<Message> messages = List.of(MOCK_MESSAGE_3, MOCK_MESSAGE_2, MOCK_MESSAGE_1);
-        when(messageRepository.findAllByReceiverIdOrderByDateSentDesc(MOCK_USER_ID))
-                .thenReturn(Optional.of(messages));
-        List<Message> actualResult = messageService.getMessagesByReceiverId(MOCK_USER_ID);
-        assertTrue(actualResult.getFirst().getDateSent().isAfter(actualResult.get(1).getDateSent()));
-        assertTrue(actualResult.getFirst().getDateSent().isAfter(actualResult.get(2).getDateSent()));
-        assertTrue(actualResult.get(1).getDateSent().isAfter(actualResult.get(2).getDateSent()));
-    }
-
-    @Test
-    void shouldReturn_ListSize3_ListOfTypeMessage_And_UpdateReadToTrue_And() {
-        List<Message> messages = List.of(MOCK_MESSAGE_3, MOCK_MESSAGE_2, MOCK_MESSAGE_1);
-        when(messageRepository.findAllByReceiverIdOrderByDateSentDesc(MOCK_USER_ID))
-                .thenReturn(Optional.of(messages));
-        int expectedSize = 3;
-        List<Message> actualResult = messageService.getMessagesByReceiverId(MOCK_USER_ID);
-        assertEquals(expectedSize, actualResult.size());
-        assertInstanceOf(Message.class, actualResult.getFirst());
-        assertTrue(actualResult.getFirst().isRead());
+        when(messageRepository.findAllByReceiverIdOrderByDateSentDesc(MOCK_USER_ID, pageRequest))
+                .thenReturn(new PageImpl<>(List.of(MOCK_MESSAGE_3, MOCK_MESSAGE_2, MOCK_MESSAGE_1)));
+        Page<Message> actualResult = messageService.getMessagesByReceiverId(
+                MOCK_USER_ID,
+                false,
+                0,
+                10);
+        List<Message> actualResultList = actualResult.get().toList();
+        assertTrue(actualResultList.getFirst().getDateSent().isAfter(actualResultList.get(1).getDateSent()));
+        assertTrue(actualResultList.getFirst().getDateSent().isAfter(actualResultList.get(2).getDateSent()));
+        assertTrue(actualResultList.get(1).getDateSent().isAfter(actualResultList.get(2).getDateSent()));
     }
 }
