@@ -5,6 +5,7 @@ import com.karova.messaging_service.domain.user.repos.MsgUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @Service
@@ -12,8 +13,8 @@ import java.util.UUID;
 public class MsgUserService {
     private final MsgUserRepository msgUserRepository;
 
-    public MsgUser getUserById(UUID id) {
-        return msgUserRepository.findById(id).orElse(null);
+    public MsgUser getUserById(String s) throws NoSuchElementException {
+        return msgUserRepository.findById(UUID.fromString(s)).orElseThrow();
     }
 
 }
