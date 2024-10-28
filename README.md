@@ -28,7 +28,7 @@ The project has GET, POST and DELETE endpoints, each handling request that have 
 - HEADER: the _Content-Type_ should be _application/json_
 
 ### 1. GET
-
+path:
 ```
 /{userId}
 ```
@@ -81,7 +81,7 @@ The response would look like this:
 ```
 
 ### 2. POST
-
+path:
 ```
 /new
 ```
@@ -110,7 +110,7 @@ The response would look like this:
 ```
 
 ### 3. DELETE
-
+path:
 ```
 /remove?messageId={messageId}
 ```
@@ -120,6 +120,8 @@ The response would look like this:
     ```
     /remove?messageId={messageId}&messageId={messageId}
     ```
+- FEATURES: The endpoint is anticipating the message ids in a form of a list, so the list size can go for from 1 
+(deleting one message) up to as many message ids are provided by the client.
 
 ## Installation
 
