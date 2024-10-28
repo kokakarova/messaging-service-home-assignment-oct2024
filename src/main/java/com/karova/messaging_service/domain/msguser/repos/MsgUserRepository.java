@@ -1,6 +1,6 @@
-package com.karova.messaging_service.domain.user.repos;
+package com.karova.messaging_service.domain.msguser.repos;
 
-import com.karova.messaging_service.domain.user.models.MsgUser;
+import com.karova.messaging_service.domain.msguser.models.MsgUser;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.stereotype.Repository;
 

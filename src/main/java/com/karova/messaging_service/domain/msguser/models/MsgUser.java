@@ -1,4 +1,4 @@
-package com.karova.messaging_service.domain.user.models;
+package com.karova.messaging_service.domain.msguser.models;
 
 import com.karova.messaging_service.domain.message.models.Message;
 import jakarta.persistence.*;
@@ -29,6 +29,6 @@ public class MsgUser {
     @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Message> receivedMessages;
 
-    public MsgUser(String mockSenderId, String s, String mail) {
+    public MsgUser(UUID id, String userName, String email) {
     }
 }

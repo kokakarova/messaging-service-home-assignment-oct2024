@@ -1,6 +1,6 @@
 package com.karova.messaging_service.domain.message.models;
 
-import com.karova.messaging_service.domain.user.models.MsgUser;
+import com.karova.messaging_service.domain.msguser.models.MsgUser;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
