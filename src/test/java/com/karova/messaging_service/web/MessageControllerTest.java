@@ -9,6 +9,8 @@ import com.karova.messaging_service.web.dtos.SaveMessageReqDto;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.SneakyThrows;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -55,6 +57,17 @@ class MessageControllerTest {
             MOCK_MESSAGE_CONTENT,
             LocalDateTime.now(),
             true);
+
+    MockedStatic<MessageResDto> mocked;
+    @BeforeEach
+    void setUp() {
+        mocked = mockStatic(MessageResDto.class);
+    }
+
+    @AfterEach
+    void tearDown() {
+        mocked.close();
+    }
 
     @Test
     @SneakyThrows
@@ -148,7 +161,6 @@ class MessageControllerTest {
     @Test
     @SneakyThrows
     void shouldReturn_200OK_And_0ForPage_10ForPageSize_1ForTotalElements() {
-        MockedStatic<MessageResDto> mocked = mockStatic(MessageResDto.class);
         when(messageService.getMessagesByReceiverId(any(UUID.class), any(Boolean.class), anyInt(), anyInt()))
                 .thenReturn(new PageImpl<>(List.of(MOCK_MESSAGE)));
         mocked.when(() -> toDto(MOCK_MESSAGE))
@@ -164,13 +176,11 @@ class MessageControllerTest {
                 .andExpect(jsonPath("$.page", Matchers.is(0)))
                 .andExpect(jsonPath("$.totalPages", Matchers.is(1)))
                 .andExpect(jsonPath("$.totalElements", Matchers.is(1)));
-        mocked.close();
     }
 
     @Test
     @SneakyThrows
     void shouldReturn_200OK_And_MessagesList_Size1_WhenNewOnly_IsTrue() {
-        MockedStatic<MessageResDto> mocked = mockStatic(MessageResDto.class);
         when(messageService.getMessagesByReceiverId(any(UUID.class), any(Boolean.class), anyInt(), anyInt()))
                 .thenReturn(new PageImpl<>(List.of(MOCK_MESSAGE)));
         mocked.when(() -> toDto(MOCK_MESSAGE))
@@ -184,13 +194,11 @@ class MessageControllerTest {
         mockMvc.perform(get(url))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.messages.size()", Matchers.is(1)));
-        mocked.close();
     }
 
     @Test
     @SneakyThrows
     void shouldReturn_200OK_And_NewMessagesList_WhenNewOnlyNotProvided() {
-        MockedStatic<MessageResDto> mocked = mockStatic(MessageResDto.class);
         when(messageService.getMessagesByReceiverId(any(UUID.class), any(Boolean.class), anyInt(), anyInt()))
                 .thenReturn(new PageImpl<>(List.of(MOCK_MESSAGE)));
         mocked.when(() -> toDto(MOCK_MESSAGE))
@@ -203,7 +211,6 @@ class MessageControllerTest {
                 .toUriString();
         mockMvc.perform(get(url))
                 .andExpect(status().isOk());
-        mocked.close();
     }
 
 
