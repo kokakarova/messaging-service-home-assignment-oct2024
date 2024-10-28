@@ -23,11 +23,6 @@ public class MessageController {
 
     private final MessageService messageService;
 
-    @GetMapping
-    public String hello() {
-        return "Hello World";
-    }
-
     // todo: explain and support why matching users by id (and not email, user_name etc.)
     @PostMapping("/new")
     public ResponseEntity<SaveMessageResDto> saveNewMessage(@Valid @RequestBody SaveMessageReqDto messageReq) {
