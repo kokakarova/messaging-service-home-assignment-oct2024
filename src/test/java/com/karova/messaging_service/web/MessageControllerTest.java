@@ -3,9 +3,10 @@ package com.karova.messaging_service.web;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.karova.messaging_service.domain.message.models.Message;
 import com.karova.messaging_service.domain.message.services.MessageService;
-import com.karova.messaging_service.domain.user.models.MsgUser;
+import com.karova.messaging_service.domain.msguser.models.MsgUser;
 import com.karova.messaging_service.web.dtos.MessageResDto;
 import com.karova.messaging_service.web.dtos.SaveMessageReqDto;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.SneakyThrows;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -45,8 +46,8 @@ class MessageControllerTest {
     private static final String MOCK_RECEIVER_ID = "7f3191d6-f0d9-480a-9781-1588012e3e55";
     private static final String MOCK_MESSAGE_CONTENT = "mock message content";
     private static final UUID MOCK_MESSAGE_ID = UUID.randomUUID();
-    private static final MsgUser MOCK_SENDER = new MsgUser(MOCK_SENDER_ID, "mock-user-1", "mock1@email.com");
-    private static final MsgUser MOCK_RECEIVER = new MsgUser(MOCK_RECEIVER_ID, "mock-user-2", "mock2@email.com");
+    private static final MsgUser MOCK_SENDER = new MsgUser(UUID.fromString(MOCK_SENDER_ID), "mock-user-1", "mock1@email.com");
+    private static final MsgUser MOCK_RECEIVER = new MsgUser(UUID.fromString(MOCK_RECEIVER_ID), "mock-user-2", "mock2@email.com");
     private static final Message MOCK_MESSAGE = new Message(
             MOCK_MESSAGE_ID,
             MOCK_SENDER,
@@ -116,6 +117,22 @@ class MessageControllerTest {
 
     @Test
     @SneakyThrows
+    void shouldReturn_NotFound_WhenUserNotFound() {
+        SaveMessageReqDto mockValidReqBody = new SaveMessageReqDto(MOCK_SENDER_ID, MOCK_RECEIVER_ID, MOCK_MESSAGE_CONTENT);
+        when(messageService.createMessage(mockValidReqBody))
+                .thenThrow(EntityNotFoundException.class);
+        String json = objectMapper.writeValueAsString(mockValidReqBody);
+        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/messages/new")
+                .toUriString();
+        mockMvc.perform(post(url)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+                        .characterEncoding("utf-8"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @SneakyThrows
     void shouldReturn_BadRequest_WhenGettingMessages_ForInvalidUserId() {
         // todo: put in beforeEach, close AfterEach
         MockedStatic<MsgValidator> mocked = mockStatic(MsgValidator.class);
@@ -170,6 +187,25 @@ class MessageControllerTest {
         mocked.close();
     }
 
+    @Test
+    @SneakyThrows
+    void shouldReturn_200OK_And_NewMessagesList_WhenNewOnlyNotProvided() {
+        MockedStatic<MessageResDto> mocked = mockStatic(MessageResDto.class);
+        when(messageService.getMessagesByReceiverId(any(UUID.class), any(Boolean.class), anyInt(), anyInt()))
+                .thenReturn(new PageImpl<>(List.of(MOCK_MESSAGE)));
+        mocked.when(() -> toDto(MOCK_MESSAGE))
+                .thenReturn(new MessageResDto(
+                        MOCK_MESSAGE_ID.toString(),
+                        MOCK_MESSAGE.getSender().getUserName(),
+                        MOCK_MESSAGE_CONTENT,
+                        MOCK_MESSAGE.getDateSent()));
+        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/messages/" + MOCK_RECEIVER_ID)
+                .toUriString();
+        mockMvc.perform(get(url))
+                .andExpect(status().isOk());
+        mocked.close();
+    }
+
 
     @Test
     @SneakyThrows
@@ -205,6 +241,16 @@ class MessageControllerTest {
         mockMvc.perform(delete(url))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", Matchers.is("Messages removed successfully")));
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldReturn_BadRequest_WhenMissingMessageId() {
+        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/messages/remove")
+                .toUriString();
+        Mockito.doNothing().when(messageService).deleteMessages(List.of(MOCK_MESSAGE_ID));
+        mockMvc.perform(delete(url))
+                .andExpect(status().isBadRequest());
     }
 
 }

@@ -2,8 +2,8 @@ package com.karova.messaging_service.domain.message.services;
 
 import com.karova.messaging_service.domain.message.models.Message;
 import com.karova.messaging_service.domain.message.repos.MessageRepository;
-import com.karova.messaging_service.domain.user.models.MsgUser;
-import com.karova.messaging_service.domain.user.services.MsgUserService;
+import com.karova.messaging_service.domain.msguser.models.MsgUser;
+import com.karova.messaging_service.domain.msguser.services.MsgUserService;
 import com.karova.messaging_service.web.dtos.SaveMessageReqDto;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -76,7 +76,7 @@ class MessageServiceTest {
     @Test
     void shouldReturn_TypeMessage_AndCorrectMessageContent() {
         when(messageRepository.save(any(Message.class))).thenReturn(MOCK_MESSAGE_1);
-        when(userService.getUserById(any(String.class))).thenReturn(new MsgUser());
+        when(userService.getUserById(any(UUID.class))).thenReturn(new MsgUser());
         Message actualResult = messageService.createMessage(MOCK_MESSAGE_REQUEST);
         assertInstanceOf(Message.class, actualResult);
         assertEquals(MOCK_MESSAGE_CONTENT, actualResult.getContent());
@@ -85,7 +85,7 @@ class MessageServiceTest {
     @Test
     void shouldReturn_NotFound_WhenUserDoesntExist() {
         when(messageRepository.save(any(Message.class))).thenReturn(MOCK_MESSAGE_1);
-        when(userService.getUserById(any(String.class))).thenThrow();
+        when(userService.getUserById(any(UUID.class))).thenThrow();
         assertThrows(EntityNotFoundException.class, () -> messageService.createMessage(MOCK_MESSAGE_REQUEST));
     }
 
