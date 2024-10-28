@@ -176,7 +176,7 @@ There are two prepopulated user with IDs: 6bd3ade7-7daa-4bc7-ba33-3e5879865a8d a
 There are a couple of ways you can test this API:
 ### 1. Using curl in the terminal
 ```
-curl http://localhost:8080/api/messages
+curl http://localhost:8080/api/messages{path}
 ```
 examples:  
 
