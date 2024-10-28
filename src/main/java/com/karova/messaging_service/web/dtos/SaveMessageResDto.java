@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public record SaveMessageResDto(
         String messageId,
-        String messageContent,
+        String content,
         String senderId,
         String receiverId,
         LocalDateTime sentAt) {
