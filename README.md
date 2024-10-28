@@ -7,7 +7,10 @@
     2. [POST](#2-post)
     3. [DELETE](#3-delete)
 3. [Installation](#installation)
-4. [Running and Testing](#running-and-testing)
+    1. [Through the terminal](#through-the-terminal)
+    2. [Through IntelliJ](#through-intellij)
+5. [Build Troubleshooting](#build-troubleshooting)
+6. [Running and Testing](#running-and-testing)
 
 ## Project Description
 
@@ -25,7 +28,7 @@ The project has GET, POST and DELETE endpoints, each handling request that have 
 - UNIQUE IDENTIFIER: Users and messages are identified with ID for two reasons - 1) I
   assume that the client would already have the ID, and 2) it's safer to identify entities (users) with their unique
   identifiers (ID) because, depending on the client, the email or user_name could be changed.
-- HEADER: the _Content-Type_ should be _application/json_
+- HEADER: the _Content-Type_ should be _application/json_.
 
 ### 1. GET
 path:
@@ -41,14 +44,13 @@ path:
     2. "newOnly" (boolean) - __not required__.
         1. The default value is _true_, so if no value is provided from
            the client side the endpoint will serve only new messages.
-        2. To get all messages, _false_ value should be provided
+        2. To get all messages, _false_ value should be provided.
     ```
     /{userId}?newOnly=false
     ```
     3. "page" (int) - __not required__. The default value is 0 (first page).
     4. "pageSize" (int) - __not required__. The default value is 10 (it will show 10 messages at a time, unless
-       requested
-       otherwise).
+       requested otherwise).
 
 Including all the variables for this endpoint, the path would look like this:
 
@@ -86,7 +88,7 @@ path:
 /new
 ```
 
-- USE: create a new message
+- USE: create a new message.
 - REQUEST ELEMENTS: This endpoint requires a request body with three elements:
 
 ```
@@ -115,7 +117,7 @@ path:
 /remove?messageId={messageId}
 ```
 
-- USE: Delete _one_ or _multiple_ message  
+- USE: Delete _one_ or _multiple_ message  .
   To delete two messages call the endpoint like this ↓ Same logic applies for multiple message IDs.
     ```
     /remove?messageId={messageId}&messageId={messageId}
@@ -129,7 +131,7 @@ To build and run the project you could proceed in two ways - through the termina
 
 ### Through the terminal
 
-1. Navigate to the project folder
+1. Navigate to the project folder:
 
 ```
 cd osttra-home-assignment-oct2024
@@ -141,13 +143,13 @@ cd osttra-home-assignment-oct2024
 mvn clean install
 ```
 
-3. Run the docker container for the database
+3. Run the docker container for the database:
 
 ```
 docker compose up -d
 ```
 
-4. Navigate to the target folder and execute the jar file
+4. Navigate to the target folder and execute the jar file:
 
 ```
 cd target/ && java -jar messaging-service-0.0.1-SNAPSHOT.jar
@@ -157,24 +159,52 @@ The app should be ready and running on port 8080.
 
 ### Through IntelliJ
 
-1. Open the project in the IDE (IntelliJ)
-2. From the terminal run the docker container for the database
+1. Open the project in the IDE (IntelliJ).
+2. From the terminal run the docker container for the database.
 
 ```
 docker compose up -d
 ```
-
 3. In the project folders find the main class file _MessagingServiceApplication.java_,
    right-click on it and select _Run_.
 
    The app should be ready and running on port 8080.
+
+## Build Troubleshooting
+
+If port 8080 is unavailable, the application will not start. There are two ways to remedy this:
+
+### 1. Edit application.yml
+Navigate to src/main/resources/application.yml and at the top of the file paste these two lines ↓. If port 8000 is also not available, try another.
+```
+server:
+  port: 8000
+```
+### 1. Kill the port 🔪
+Go the terminal and type/paste:
+```
+lsof -i -P -n | grep LISTEN
+```
+You will get something like this:
+```
+full-line 61147 kostichy   10u  IPv6 0xa82d370e3535bd58      0t0    TCP 127.0.0.1:56311 (LISTEN)
+java      62572 kostichy   80u  IPv6 0x27fca547fa26573b      0t0    TCP *:56699 (LISTEN)
+java      62572 kostichy   93u  IPv6 0x55f0aeda6be4619c      0t0    TCP *:8080 (LISTEN)
+```
+In the last column is the port number, in the second column are the digits we'll use to kill the port. In the terminal, type/paste kill -9 and add the digits from the second column, like this:
+```
+kill -9 62572
+```
+
+Now you should be able to run the application. If you're running it [Through the terminal](#through-the-terminal) try step 4 again.  
+If you're running it [Through IntelliJ](#through-intellij) try step 3 again.
 
 ## Running and Testing
 When initially run, the database will have prepopulated data for users and messages.  
 There are two prepopulated user with IDs: 6bd3ade7-7daa-4bc7-ba33-3e5879865a8d and 2f3197d6-f0d9-480a-9784-2588012e3e73.
 
 There are a couple of ways you can test this API:
-### 1. Using curl in the terminal
+### 1. Using curl in the terminal:
 ```
 curl http://localhost:8080/api/messages{path}
 ```
@@ -197,10 +227,10 @@ curl -X DELETE http://localhost:8080/api/messages/remove?messageId=2bd3ade7-7daa
 ### 3. Through Postman
 You can use the browser version, but you need to sign up.
 1. Paste the [BASE URL](#base-url) + the corresponding path in the input bar at the top. Make sure to choose the 
-right method and extension [GET](#1-get)/[POST](#2-post)/[DELETE](#3-delete) at the left end of it. Click _Send_ to execute
+right method and extension [GET](#1-get)/[POST](#2-post)/[DELETE](#3-delete) at the left end of it. Click _Send_ to execute.
 2. The parameters (where applicable) will be populated here. You can change them in these input fields. 
 When testing the POST endpoint enter the Request Body in the _Body_ tab, select the _raw_ radio button, and at the end of 
 that line select _JSON_. Paste or type the body here as shown in the [POST](#2-post) section.
-3. At the bottom is where you get the result. The status code is on the right (The green '200 OK' in the screenshot)  
+3. At the bottom is where you get the result. The status code is on the right (The green '200 OK' in the screenshot).  
 
    <img width="1389" alt="postman" src="images/testing-with-postman.png">
