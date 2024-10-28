@@ -22,8 +22,8 @@ http://localhost:8080/api/messages
 
 The project has GET, POST and DELETE endpoints, each handling request that have to do with messages.
 
-- UNIQUE IDENTIFIER: To identify the user or message I am using the user/message ID for two reasons - I
-  assume that the client would already have the ID, and it's safer to identify entities (users) with their unique
+- UNIQUE IDENTIFIER: Users and messages are identified with ID for two reasons - 1) I
+  assume that the client would already have the ID, and 2) it's safer to identify entities (users) with their unique
   identifiers (ID) because, depending on the client, the email or user_name could be changed.
 - HEADER: the _Content-Type_ should be _application/json_
 
@@ -33,15 +33,15 @@ The project has GET, POST and DELETE endpoints, each handling request that have 
 /{userId}
 ```
 
-- USE: retrieve _new_ messages and _all_ messages for a user.
+- USE: retrieve _new_ and _all_ messages for a user.
 - FEATURES: The endpoint is built with pagination in mind, so along with a list of messages, it will also show the
   current page, total number of pages, and total number of elements (messages).
-- REQUEST ELEMENTS: There are four variables that go with this endpoint.
+- REQUEST ELEMENTS: There are four variables that can be added to the path of this endpoint.
     1. "userId" (UUID) as a path variable - __required__
     2. "newOnly" (boolean) - __not required__.
         1. The default value is _true_, so if no value is provided from
            the client side the endpoint will serve only new messages.
-        2. To get all messages _false_ value should be provided
+        2. To get all messages, _false_ value should be provided
     ```
     /{userId}?newOnly=false
     ```
@@ -50,10 +50,10 @@ The project has GET, POST and DELETE endpoints, each handling request that have 
        requested
        otherwise).
 
-Including all the variables for this endpoint would look like this:
+Including all the variables for this endpoint, the path would look like this:
 
 ```
-/{userId}?newOnly=false&page=0&pageSize=5
+/{userId}?newOnly=false&page=0&pageSize=2
 ```
 
 The response would look like this:
@@ -87,7 +87,7 @@ The response would look like this:
 ```
 
 - USE: create a new message
-- REQUEST ELEMENTS: This endpoint needs a request body with three elements:
+- REQUEST ELEMENTS: This endpoint requires a request body with three elements:
 
 ```
 {
@@ -102,7 +102,7 @@ The response would look like this:
 ```
 {
     "messageId": "df032e3b-62aa-475a-904e-9f0e5a752e22",
-    "content": "mock message 22",
+    "content": "mock message",
     "senderId": "2f3197d6-f0d9-480a-9784-2588012e3e73",
     "receiverId": "6bd3ade7-7daa-4bc7-ba33-3e5879865a8d",
     "sentAt": "2024-10-28T09:57:14.313166"
