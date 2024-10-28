@@ -23,7 +23,6 @@ public class MessageController {
 
     private final MessageService messageService;
 
-    // todo: explain and support why matching users by id (and not email, user_name etc.)
     @PostMapping("/new")
     public ResponseEntity<SaveMessageResDto> saveNewMessage(@Valid @RequestBody SaveMessageReqDto messageReq) {
         Message savedMessage = messageService.createMessage(messageReq);
@@ -54,7 +53,6 @@ public class MessageController {
         }
     }
 
-    // todo: elaborate why it's one endpoint for single and multiple messages
     @DeleteMapping("/remove")
     public ResponseEntity<String> removeMessages(@RequestParam List<UUID> messageId) {
         String responseMessage = "Messages removed successfully";
