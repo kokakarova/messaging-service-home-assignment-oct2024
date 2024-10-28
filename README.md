@@ -199,7 +199,7 @@ You can use the browser version, but you need to sign up.
 1. Paste the [BASE URL](#base-url) + the corresponding path in the input bar at the top. Make sure to choose the 
 right method and extension [GET](#1-get)/[POST](#2-post)/[DELETE](#3-delete) at the left end of it. Click _Send_ to execute
 2. The parameters (where applicable) will be populated here. You can change them in these input fields. 
-When testing the POST endpoint enter the Request Body in the _Body_, select the _raw_ radio button, and at the end of 
+When testing the POST endpoint enter the Request Body in the _Body_ tab, select the _raw_ radio button, and at the end of 
 that line select _JSON_. Paste or type the body here as shown in the [POST](#2-post) section.
 3. At the bottom is where you get the result. The status code is on the right (The green '200 OK' in the screenshot)  
 
