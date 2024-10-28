@@ -30,5 +30,8 @@ public class MsgUser {
     private Set<Message> receivedMessages;
 
     public MsgUser(UUID id, String userName, String email) {
+        this.id = id;
+        this.userName = userName;
+        this.email = email;
     }
 }

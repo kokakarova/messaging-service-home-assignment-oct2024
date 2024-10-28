@@ -29,6 +29,7 @@ class MsgUserServiceTest {
         when(mockRepo.findById(any(UUID.class))).thenReturn(Optional.of(MOCK_USER));
         MsgUser actualResult = msgUserService.getUserById(MOCK_USER_ID);
         assertInstanceOf(MsgUser.class, actualResult);
+        assertEquals(MOCK_USER_ID, actualResult.getId());
     }
     @Test
     void shouldThrow_WhenUserNotFound() {
