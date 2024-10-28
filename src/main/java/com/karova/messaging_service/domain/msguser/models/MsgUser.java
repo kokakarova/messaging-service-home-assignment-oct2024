@@ -3,14 +3,14 @@ package com.karova.messaging_service.domain.msguser.models;
 import com.karova.messaging_service.domain.message.models.Message;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 
 import java.util.Set;
 import java.util.UUID;
 
 @Entity
 @Data
-@RequiredArgsConstructor
+@NoArgsConstructor
 public class MsgUser {
 
     @Id
