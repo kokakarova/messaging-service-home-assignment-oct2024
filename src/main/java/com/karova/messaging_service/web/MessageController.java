@@ -46,7 +46,7 @@ public class MessageController {
             MessageListResDto response = new MessageListResDto(
                     messages.getNumber(),
                     messages.getTotalPages(),
-                    messages.getNumberOfElements(),
+                    (int) messages.getTotalElements(),
                     messages.stream().map(MessageResDto::toDto).toList());
             return ResponseEntity.ok(response);
         } else {
