@@ -3,8 +3,8 @@ package com.karova.messaging_service.domain.message.services;
 import com.karova.messaging_service.domain.message.models.Message;
 import com.karova.messaging_service.domain.message.repos.MessageRepository;
 
-import com.karova.messaging_service.domain.user.models.MsgUser;
-import com.karova.messaging_service.domain.user.services.MsgUserService;
+import com.karova.messaging_service.domain.msguser.models.MsgUser;
+import com.karova.messaging_service.domain.msguser.services.MsgUserService;
 import com.karova.messaging_service.web.dtos.SaveMessageReqDto;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +26,8 @@ public class MessageService {
         MsgUser sender;
         MsgUser receiver;
         try {
-            sender = msgUserService.getUserById(message.senderId());
-            receiver = msgUserService.getUserById(message.receiverId());
+            sender = msgUserService.getUserById(UUID.fromString(message.senderId()));
+            receiver = msgUserService.getUserById(UUID.fromString(message.receiverId()));
         } catch (Exception e) {
             throw new EntityNotFoundException("User not found");
         }
