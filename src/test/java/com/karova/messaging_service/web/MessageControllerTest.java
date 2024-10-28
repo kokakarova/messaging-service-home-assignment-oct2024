@@ -40,7 +40,7 @@ class MessageControllerTest {
     @Autowired
     MockMvc mockMvc;
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private static final String BASE_URL = "/api";
+    private static final String BASE_URL = "/api/messages";
     private static final String INVALID_USER_ID = "6bd3ade7-7daa-4bc7-ba33-3e5879865a";
     private static final String MOCK_SENDER_ID = "2f3197d6-f0d9-480a-9781-1588012e3e73";
     private static final String MOCK_RECEIVER_ID = "7f3191d6-f0d9-480a-9781-1588012e3e55";
@@ -61,7 +61,7 @@ class MessageControllerTest {
     void shouldReturn_BadRequest_WhenInvalidUserId() {
         SaveMessageReqDto mockInvalidReqBody = new SaveMessageReqDto(INVALID_USER_ID, MOCK_RECEIVER_ID, MOCK_MESSAGE_CONTENT);
         String json = objectMapper.writeValueAsString(mockInvalidReqBody);
-        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/messages/new")
+        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/new")
                 .toUriString();
         mockMvc.perform(post(url)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -75,7 +75,7 @@ class MessageControllerTest {
     void shouldReturn_BadRequest_WhenMsgContent_IsBlank() {
         SaveMessageReqDto mockInvalidReqBody = new SaveMessageReqDto(MOCK_SENDER_ID, MOCK_RECEIVER_ID, " ");
         String json = objectMapper.writeValueAsString(mockInvalidReqBody);
-        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/messages/new")
+        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/new")
                 .toUriString();
         mockMvc.perform(post(url)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -89,7 +89,7 @@ class MessageControllerTest {
     void shouldReturn_BadRequest_WhenMsgContent_Missing() {
         InvalidSaveMessageDto mockInvalidReqBody = new InvalidSaveMessageDto(MOCK_SENDER_ID, MOCK_RECEIVER_ID);
         String json = objectMapper.writeValueAsString(mockInvalidReqBody);
-        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/messages/new")
+        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/new")
                 .toUriString();
         mockMvc.perform(post(url)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -105,7 +105,7 @@ class MessageControllerTest {
         when(messageService.createMessage(mockValidReqBody))
                 .thenReturn(new Message(MOCK_MESSAGE_ID, new MsgUser(), new MsgUser(), MOCK_MESSAGE_CONTENT, LocalDateTime.now(), false));
         String json = objectMapper.writeValueAsString(mockValidReqBody);
-        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/messages/new")
+        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/new")
                 .toUriString();
         mockMvc.perform(post(url)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -122,7 +122,7 @@ class MessageControllerTest {
         when(messageService.createMessage(mockValidReqBody))
                 .thenThrow(EntityNotFoundException.class);
         String json = objectMapper.writeValueAsString(mockValidReqBody);
-        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/messages/new")
+        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/new")
                 .toUriString();
         mockMvc.perform(post(url)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -136,7 +136,7 @@ class MessageControllerTest {
     void shouldReturn_BadRequest_WhenGettingMessages_ForInvalidUserId() {
         // todo: put in beforeEach, close AfterEach
         MockedStatic<MsgValidator> mocked = mockStatic(MsgValidator.class);
-        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/messages/" + INVALID_USER_ID)
+        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/" + INVALID_USER_ID)
                 .toUriString();
         mocked.when(() -> isValid(anyString()))
                 .thenReturn(false);
@@ -157,7 +157,7 @@ class MessageControllerTest {
                         MOCK_MESSAGE.getSender().getUserName(),
                         MOCK_MESSAGE_CONTENT,
                         MOCK_MESSAGE.getDateSent()));
-        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/messages/" + MOCK_RECEIVER_ID + "?newOnly=true")
+        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/" + MOCK_RECEIVER_ID + "?newOnly=true")
                 .toUriString();
         mockMvc.perform(get(url))
                 .andExpect(status().isOk())
@@ -179,7 +179,7 @@ class MessageControllerTest {
                         MOCK_MESSAGE.getSender().getUserName(),
                         MOCK_MESSAGE_CONTENT,
                         MOCK_MESSAGE.getDateSent()));
-        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/messages/" + MOCK_RECEIVER_ID + "?newOnly=true")
+        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/" + MOCK_RECEIVER_ID + "?newOnly=true")
                 .toUriString();
         mockMvc.perform(get(url))
                 .andExpect(status().isOk())
@@ -199,7 +199,7 @@ class MessageControllerTest {
                         MOCK_MESSAGE.getSender().getUserName(),
                         MOCK_MESSAGE_CONTENT,
                         MOCK_MESSAGE.getDateSent()));
-        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/messages/" + MOCK_RECEIVER_ID)
+        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/" + MOCK_RECEIVER_ID)
                 .toUriString();
         mockMvc.perform(get(url))
                 .andExpect(status().isOk());
@@ -210,7 +210,7 @@ class MessageControllerTest {
     @Test
     @SneakyThrows
     void shouldReturn_EmptyList_WhenNoNewMessages() {
-        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/messages/" + MOCK_RECEIVER_ID + "?newOnly=true")
+        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/" + MOCK_RECEIVER_ID + "?newOnly=true")
                 .toUriString();
         when(messageService.getMessagesByReceiverId(any(UUID.class), any(Boolean.class), anyInt(), anyInt()))
                 .thenReturn(new PageImpl<>(List.of()));
@@ -222,7 +222,7 @@ class MessageControllerTest {
     @Test
     @SneakyThrows
     void shouldReturn_200OK_AndMessageRemovedSuccessfully_WhenRemoving1Message() {
-        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/messages/remove?messageId=" + MOCK_MESSAGE_ID)
+        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/remove?messageId=" + MOCK_MESSAGE_ID)
                 .toUriString();
         Mockito.doNothing().when(messageService).deleteMessages(List.of(MOCK_MESSAGE_ID));
         mockMvc.perform(delete(url))
@@ -234,7 +234,7 @@ class MessageControllerTest {
     @SneakyThrows
     void shouldReturn_200OK_AndMessagesRemovedSuccessfully_WhenRemoving2Message() {
         UUID mockMessageId2 = UUID.randomUUID();
-        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/messages/remove?messageId=" + MOCK_MESSAGE_ID
+        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/remove?messageId=" + MOCK_MESSAGE_ID
                 + "&messageId=" + mockMessageId2)
                 .toUriString();
         Mockito.doNothing().when(messageService).deleteMessages(List.of(MOCK_MESSAGE_ID));
@@ -246,7 +246,7 @@ class MessageControllerTest {
     @Test
     @SneakyThrows
     void shouldReturn_BadRequest_WhenMissingMessageId() {
-        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/messages/remove")
+        String url = UriComponentsBuilder.fromUriString(BASE_URL + "/remove")
                 .toUriString();
         Mockito.doNothing().when(messageService).deleteMessages(List.of(MOCK_MESSAGE_ID));
         mockMvc.perform(delete(url))
